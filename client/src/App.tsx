@@ -1,6 +1,6 @@
 import Canvas from './components/Canvas'
 import SettingBar from './components/SettingBar'
-import Toolbar from './components/Toolbar'
+import Toolbar from './components/Toolbar/Toolbar'
 import styled from 'styled-components'
 
 const AppWrapper = styled.div`

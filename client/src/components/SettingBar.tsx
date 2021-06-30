@@ -1,13 +1,8 @@
 import styled from 'styled-components'
+import { StyledBar } from './Toolbar/components'
 
-const StyledSettingBar = styled.div`
+const StyledSettingBar = styled(StyledBar)`
   height: ${({ theme }) => theme.main.toolbarHeight};
-  background-color: white;
-  display: flex;
-  align-items: center;
-  position: absolute;
-  width: 100%;
-  box-shadow: 0 4px 5px gray;
   top: ${({ theme }) => theme.main.toolbarHeight};
 `
 
