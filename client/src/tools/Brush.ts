@@ -34,6 +34,5 @@ export default class Brush extends Tool {
   draw(x: number, y: number) {
     this.ctx?.lineTo(x, y)
     this.ctx?.stroke()
-    console.log('draw bush')
   }
 }

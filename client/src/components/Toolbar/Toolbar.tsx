@@ -17,8 +17,14 @@ import {
   ButtonRedo,
   ButtonSave,
 } from './components'
+import { ChangeEvent } from 'react'
 
 const Toolbar = () => {
+  const changeColor = (e: ChangeEvent<HTMLInputElement>) => {
+    toolState.setStrokeColor(e.target.value)
+    toolState.setFillColor(e.target.value)
+  }
+
   return (
     <StyledToolbar>
       <ButtonBrush onClick={() => toolState.setTool(new Brush(canvasState.canvas))} />
@@ -26,9 +32,9 @@ const Toolbar = () => {
       <ButtonCircle onClick={() => toolState.setTool(new Circle(canvasState.canvas))} />
       <ButtonEraser onClick={() => toolState.setTool(new Eraser(canvasState.canvas))} />
       <ButtonLine onClick={() => toolState.setTool(new Line(canvasState.canvas))} />
-      <input type="color" style={{ marginLeft: 10 }}></input>
-      <ButtonUndo />
-      <ButtonRedo />
+      <input onChange={(e) => changeColor(e)} type="color" style={{ marginLeft: 10 }}></input>
+      <ButtonUndo onClick={() => canvasState.undo()} />
+      <ButtonRedo onClick={() => canvasState.redo()} />
       <ButtonSave />
     </StyledToolbar>
   )

@@ -27,9 +27,17 @@ const Canvas = observer(() => {
     }
   }, [])
 
+  const mouseDownHandler = () => {
+    console.log('gfgf')
+
+    if (canvasRef.current) {
+      canvasState.pushToUndo(canvasRef.current.toDataURL())
+    }
+  }
+
   return (
     <StyledCanvasWrap>
-      <StyledCanvas ref={canvasRef} width={800} height={600} />
+      <StyledCanvas onMouseDown={() => mouseDownHandler()} ref={canvasRef} width={800} height={500} />
     </StyledCanvasWrap>
   )
 })

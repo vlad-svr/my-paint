@@ -32,16 +32,6 @@ export default class Rect extends Tool {
 
   mouseMoveHandler(e: MouseEvent) {
     const target = e.target as HTMLElement
-    console.log(
-      'pageX: ',
-      e.pageX,
-      'offsetLeft: ',
-      target?.offsetLeft,
-      'pageY: ',
-      e.pageY,
-      'offsetTop: ',
-      target.offsetTop
-    )
     if (this.mouseDown) {
       const currentX = e.pageX - target.offsetLeft
       const currentY = e.pageY - target.offsetTop
@@ -62,6 +52,5 @@ export default class Rect extends Tool {
       this.ctx?.fill()
       this.ctx?.stroke()
     }
-    console.log('draw rect')
   }
 }
