@@ -26,16 +26,6 @@ export default class Brush extends Tool {
 
   mouseMoveHandler(e: MouseEvent) {
     const target = e.target as HTMLElement
-    // console.log(
-    //   'pageX: ',
-    //   e.pageX,
-    //   'offsetLeft: ',
-    //   target?.offsetLeft,
-    //   'pageY: ',
-    //   e.pageY,
-    //   'offsetTop: ',
-    //   target.offsetTop
-    // )
     if (this.mouseDown) {
       this.draw(e.pageX - target?.offsetLeft, e.pageY - target.offsetTop)
     }

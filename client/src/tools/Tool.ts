@@ -9,8 +9,11 @@ export default class Tool {
   }
 
   destroyEvents() {
+    if (!this.ctx) return
     this.canvas.onmousemove = null
     this.canvas.onmouseup = null
     this.canvas.onmousedown = null
+    this.ctx.lineWidth = 1
+    this.ctx.strokeStyle = '#000000'
   }
 }
