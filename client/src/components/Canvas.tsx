@@ -1,5 +1,8 @@
 import { observer } from 'mobx-react-lite'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import Button from 'react-bootstrap/esm/Button'
+import Modal from 'react-bootstrap/esm/Modal'
+import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import canvasState from '../store/canvasState'
 import toolState from '../store/toolState'
@@ -17,8 +20,29 @@ const StyledCanvas = styled.canvas`
   background-color: white;
 `
 
+const StyledInput = styled.input`
+  display: block;
+  margin: 0 auto;
+  height: 40px;
+  border: none;
+  border-bottom: 1px solid #dee2e6;
+  padding: 0 10px 5px 10px;
+  font-size: 26px;
+
+  &:focus,
+  &:hover,
+  &:active {
+    outline: none;
+  }
+`
+
+const WS_SERVER = 'ws://localhost:5000'
+
 const Canvas = observer(() => {
+  const params = useParams<{ id: string }>()
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const usernameRef = useRef<HTMLInputElement>(null)
+  const [modal, setModal] = useState(true)
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -27,16 +51,55 @@ const Canvas = observer(() => {
     }
   }, [])
 
-  const mouseDownHandler = () => {
-    console.log('gfgf')
+  useEffect(() => {
+    if (canvasState.username) {
+      const socket = new WebSocket(WS_SERVER)
+      socket.onopen = () => {
+        console.log('Подключение установлено')
 
+        socket.send(
+          JSON.stringify({
+            id: params.id,
+            username: canvasState.username,
+            method: 'connection',
+          })
+        )
+      }
+
+      socket.onmessage = (event) => {
+        console.log(`Пользователь ${event.data} подключился`)
+      }
+    }
+  }, [modal])
+
+  const mouseDownHandler = () => {
     if (canvasRef.current) {
       canvasState.pushToUndo(canvasRef.current.toDataURL())
     }
   }
 
+  const connectionHandler = () => {
+    if (usernameRef.current && usernameRef.current.value) {
+      canvasState.setUsername(usernameRef.current.value)
+      setModal(false)
+    }
+  }
+
   return (
     <StyledCanvasWrap>
+      <Modal show={modal} onHide={() => {}} backdrop="static" keyboard={false}>
+        <Modal.Header>
+          <Modal.Title>Введите ваше имя</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <StyledInput type="text" ref={usernameRef} />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => connectionHandler()}>
+            Войти
+          </Button>
+        </Modal.Footer>
+      </Modal>
       <StyledCanvas onMouseDown={() => mouseDownHandler()} ref={canvasRef} width={800} height={500} />
     </StyledCanvasWrap>
   )

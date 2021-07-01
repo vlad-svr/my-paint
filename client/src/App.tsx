@@ -2,6 +2,7 @@ import Canvas from './components/Canvas'
 import SettingBar from './components/SettingBar'
 import Toolbar from './components/Toolbar/Toolbar'
 import styled from 'styled-components'
+import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom'
 
 const AppWrapper = styled.div`
   height: 100vh;
@@ -12,11 +13,18 @@ const AppWrapper = styled.div`
 
 const App = () => {
   return (
-    <AppWrapper>
-      <Toolbar />
-      <SettingBar />
-      <Canvas />
-    </AppWrapper>
+    <BrowserRouter>
+      <AppWrapper>
+        <Switch>
+          <Route path="/:id">
+            <Toolbar />
+            <SettingBar />
+            <Canvas />
+          </Route>
+          <Redirect to={`f${(+new Date()).toString(16)}`} />
+        </Switch>
+      </AppWrapper>
+    </BrowserRouter>
   )
 }
 
