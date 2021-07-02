@@ -10,6 +10,7 @@ export class Socket {
     this.ws = ws
     this.aWss = aWss
     this.emitter = new EventEmitter()
+    this.ws.socketId = `ui${(+new Date()).toString(16)}`
     this.listen()
   }
 

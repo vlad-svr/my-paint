@@ -15,10 +15,10 @@ export class SocketHandler {
     this.broadcastConnection(msg)
   }
 
-  private broadcastConnection(msg: IMsg) {
+  broadcastConnection(msg: IMsg) {
     this.aWss.clients.forEach((client: WebSocketEx) => {
-      if (client.id === msg.id) {
-        client.send(msg.username)
+      if (client.id === msg.id && client.socketId !== this.ws.socketId) {
+        client.send(JSON.stringify(msg))
       }
     })
   }

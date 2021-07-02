@@ -4,9 +4,14 @@ import Button from 'react-bootstrap/esm/Button'
 import Modal from 'react-bootstrap/esm/Modal'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
+import { WS_SERVER } from '../api/api'
+import { ImageAPI } from '../api/image-api'
+import { Tools } from '../interfaces'
 import canvasState from '../store/canvasState'
 import toolState from '../store/toolState'
 import Brush from '../tools/Brush'
+import Rect from '../tools/Rect'
+import Tool from '../tools/Tool'
 
 const StyledCanvasWrap = styled.div`
   height: 100vh;
@@ -36,7 +41,18 @@ const StyledInput = styled.input`
   }
 `
 
-const WS_SERVER = 'ws://localhost:5000'
+interface IMsg {
+  id: string
+  method: string
+  username: string
+  userId: string
+}
+
+export interface IMsgFigure extends IMsg {
+  figure: {
+    type: Tools
+  } & any
+}
 
 const Canvas = observer(() => {
   const params = useParams<{ id: string }>()
@@ -47,16 +63,27 @@ const Canvas = observer(() => {
   useEffect(() => {
     if (canvasRef.current) {
       canvasState.setCanvas(canvasRef.current)
-      toolState.setTool(new Brush(canvasRef.current))
+      drawImage()
     }
   }, [])
 
+  const drawImage = async () => {
+    const res = await ImageAPI.getImage(params.id)
+    const image = `data:image/png;base64,` + res.data
+    const ctx = canvasRef.current?.getContext('2d')
+    if (ctx && canvasRef.current) {
+      Tool.drawImage(ctx, image, canvasRef.current.width, canvasRef.current.height)
+    }
+  }
+
   useEffect(() => {
-    if (canvasState.username) {
+    if (canvasState.username && canvasRef.current) {
       const socket = new WebSocket(WS_SERVER)
+      canvasState.setSocket(socket)
+      canvasState.setSessionId(params.id)
+      toolState.setTool(new Brush(canvasRef.current, socket, params.id))
       socket.onopen = () => {
         console.log('Подключение установлено')
-
         socket.send(
           JSON.stringify({
             id: params.id,
@@ -67,14 +94,50 @@ const Canvas = observer(() => {
       }
 
       socket.onmessage = (event) => {
-        console.log(`Пользователь ${event.data} подключился`)
+        const msg = JSON.parse(event.data)
+        switch (msg.method) {
+          case 'connection':
+            console.log(`Пользователь ${msg.username} подключился`)
+            break
+          case 'draw':
+            drawHandler(msg)
+        }
       }
     }
   }, [modal])
 
+  const drawHandler = (msg: IMsgFigure) => {
+    if (!canvasRef.current) return
+    const figure = msg.figure
+    const ctx = canvasRef.current.getContext('2d')
+
+    if (!ctx) return
+    switch (figure.type) {
+      case 'brush':
+        Brush.draw(ctx, figure.x, figure.y)
+        break
+      case 'rect':
+        Rect.draw(ctx, figure.x, figure.y, figure.width, figure.height, figure.color)
+        break
+      case 'finish':
+        ctx.beginPath()
+        break
+    }
+  }
+
   const mouseDownHandler = () => {
     if (canvasRef.current) {
       canvasState.pushToUndo(canvasRef.current.toDataURL())
+    }
+  }
+
+  const mouseUpHandler = async () => {
+    if (canvasRef.current) {
+      const image = {
+        name: `${params.id}.jpg`,
+        imageUrl: canvasRef.current.toDataURL().replace('data:image/png;base64,', ''),
+      }
+      await ImageAPI.sendImage(image)
     }
   }
 
@@ -100,7 +163,13 @@ const Canvas = observer(() => {
           </Button>
         </Modal.Footer>
       </Modal>
-      <StyledCanvas onMouseDown={() => mouseDownHandler()} ref={canvasRef} width={800} height={500} />
+      <StyledCanvas
+        onMouseDown={() => mouseDownHandler()}
+        onMouseUp={() => mouseUpHandler()}
+        ref={canvasRef}
+        width={800}
+        height={500}
+      />
     </StyledCanvasWrap>
   )
 })

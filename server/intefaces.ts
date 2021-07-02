@@ -1,4 +1,4 @@
-import ws from 'ws'
+import WebSocket from 'ws'
 
 export interface IMsg {
   id: string
@@ -6,11 +6,7 @@ export interface IMsg {
   username: string
 }
 
-export interface IWSocket extends ws {
-  id: string
-}
-import WebSocket from 'ws'
-
 export interface WebSocketEx extends WebSocket {
   id?: string
+  socketId?: string
 }
